@@ -3,7 +3,7 @@ import clientPromise from '../lib/mongodb'
 
 export default function Home({ isConnected }) {
   return (
-    <div className="container">
+    <div className="min-h-screen flex justify-center flex-col">
       <Head>
         <title>Create Next App</title>
         <link rel="icon" href="/favicon.ico" />
