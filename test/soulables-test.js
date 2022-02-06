@@ -4,7 +4,7 @@ const { ethers } = require("hardhat");
 let owner, tx, soulables
 const accounts = []
 
-describe("NFTCert", function () {
+describe("Soulables", function () {
   before(async () => {
     const signers = await ethers.getSigners()
     for (let i = 0; i < 10; i++) {
@@ -30,9 +30,6 @@ describe("NFTCert", function () {
       tx.forEach(async tid => {
         expect(tid.toString()).to.equal('0')
       })
-
-      tx = await soulables.getTokenMetadataHash(0)
-      expect(hashedMetadata).to.equal(tx)
 
       tx = await soulables.tokenURI(0)
       expect(uri).to.equal(tx)

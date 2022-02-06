@@ -1,7 +1,8 @@
 import Head from 'next/head'
 import clientPromise from '../lib/mongodb'
+import Hello from '../components/Hello'
 
-export default function Home({ isConnected }) {
+export default function Home({ isConnected, name }) {
   return (
     <div className="min-h-screen flex justify-center flex-col">
       <Head>
@@ -13,6 +14,8 @@ export default function Home({ isConnected }) {
         <h1 className="title">
           Welcome to <a href="https://nextjs.org">Next.js with MongoDB!</a>
         </h1>
+
+        <Hello />
 
         {isConnected ? (
           <h2 className="subtitle">You are connected to MongoDB</h2>
@@ -53,6 +56,7 @@ export default function Home({ isConnected }) {
             <h3>Deploy &rarr;</h3>
             <p>
               Instantly deploy your Next.js site to a public URL with Vercel.
+              {process.env.NEXT_PUBLIC_BASE_URL}
             </p>
           </a>
         </div>
