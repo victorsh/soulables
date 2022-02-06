@@ -22,15 +22,27 @@ contract Soulables is
   ERC721URIStorage,
   Ownable
 {
+
+  struct UserMinted {
+    address minter;
+    uint256 tokenId;
+    bool minted;
+  }
+
+  event ToMint(address indexed owner, uint256 indexed tokenId);
+
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIdCounter;
-  // mapping(uint256 => bytes32) private tokenIdToMetadataHash;
 
   bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
   bytes32 public constant USER_ROLE = keccak256("USER_ROLE");
 
   uint256 public _maxSupply = 5555;
   uint256 public _totalSupply;
+
+  uint256 public _basePrice = 1 * 10**18;
+
+  mapping(uint256 => UserMinted) tokenIdToUserMinted;
 
   /**
    * @dev Sets contract deployer to ADMIN_ROLE
@@ -40,18 +52,40 @@ contract Soulables is
   }
 
   /**
-   * @dev
+   * @dev Mints the actual token
+   * Relies on userMint method to take payment for minting before actually minting the token
    */
-  function mint(address to, string memory uri) external payable {
-    require(_totalSupply <= _maxSupply, "Max supply reached.");
-    uint256 tokenId = _tokenIdCounter.current();
-    _tokenIdCounter.increment();
+  function mint(address to, uint256 tokenId, string memory uri) external onlyOwner {
+    require(to == tokenIdToUserMinted[tokenId].minter, "Token Id must match user.");
+    require(tokenId == tokenIdToUserMinted[tokenId].tokenId, "Token Id does not match.");
+    require(false == tokenIdToUserMinted[tokenId].minted, "Token already minted.");
+
+    tokenIdToUserMinted[tokenId].minted = true;
+
     _safeMint(to, tokenId);
     _setTokenURI(tokenId, uri);
   }
 
   /**
-   * @dev
+   * @dev User Mint
+   * Anyone can call this function
+   */
+  function userMint() external payable {
+    require(msg.value >= _basePrice, "Not enought Matic sent");
+    require(_totalSupply < _maxSupply, "Max supply reached.");
+
+    _totalSupply++;
+    uint256 tokenId = _tokenIdCounter.current();
+    _tokenIdCounter.increment();
+
+    UserMinted memory minted = UserMinted(msg.sender, tokenId, false);
+    tokenIdToUserMinted[tokenId] = minted;
+
+    emit ToMint(msg.sender, tokenId);
+  }
+
+  /**
+   * @dev get the token's uri from tokenId
    */
   function tokenURI(uint256 tokenId)
     public
@@ -65,8 +99,7 @@ contract Soulables is
   /**
    * @dev
    */
-  function setTokenURI(uint256 tokenId, string memory _tokenURI) external {
-    require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Must have admin role.");
+  function setTokenURI(uint256 tokenId, string memory _tokenURI) external onlyOwner {
     super._setTokenURI(tokenId, _tokenURI);
   }
 
@@ -96,24 +129,21 @@ contract Soulables is
   /**
    * @dev Pause the contract, only admin role can pause
    */
-  function pause() public {
-    require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Must have admin role.");
+  function pause() public onlyOwner {
     _pause();
   }
 
   /**
    * @dev Unpause the contract, only admin role can unpause
    */
-  function unpause() public {
-    require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Must haver admin role.");
+  function unpause() public onlyOwner {
     _unpause();
   }
 
   /**
    * @dev Burn a token using it's id, only admin role can burn a token
    */
-  function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
-    require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Must haver admin role.");
+  function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) onlyOwner {
     super._burn(tokenId);
   }
 

@@ -1,0 +1,19 @@
+{
+  "name": "pinata-uploader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "PinataUploader.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@pinata/sdk": "^1.1.23",
+    "axios": "^0.25.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.0"
+  }
+}
