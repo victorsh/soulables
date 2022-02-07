@@ -30,17 +30,15 @@ contract Soulables is
   }
 
   event ToMint(address indexed owner, uint256 indexed tokenId);
+  event PermenantURI(string _value, uint256 indexed _id);
 
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIdCounter;
 
-  bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-  bytes32 public constant USER_ROLE = keccak256("USER_ROLE");
-
   uint256 public _maxSupply = 5555;
   uint256 public _totalSupply;
 
-  uint256 public _basePrice = 1 * 10**18;
+  uint256 public _basePrice = 50 * 10**18;
 
   mapping(uint256 => UserMinted) tokenIdToUserMinted;
 
@@ -56,6 +54,15 @@ contract Soulables is
    * Relies on userMint method to take payment for minting before actually minting the token
    */
   function mint(address to, uint256 tokenId, string memory uri) external onlyOwner {
+    _safeMint(to, tokenId);
+    _setTokenURI(tokenId, uri);
+  }
+
+  /**
+   * @dev Mints the actual token
+   * Relies on userMint method to take payment for minting before actually minting the token
+   */
+  function mintUserToken(address to, uint256 tokenId, string memory uri) external onlyOwner {
     require(to == tokenIdToUserMinted[tokenId].minter, "Token Id must match user.");
     require(tokenId == tokenIdToUserMinted[tokenId].tokenId, "Token Id does not match.");
     require(false == tokenIdToUserMinted[tokenId].minted, "Token already minted.");
